@@ -11,7 +11,6 @@ input.forEach((i, y) => {
     while(str.length > 0) {
         var match = /(\d+)/.exec(str);
         if (match) {
-            //console.log(match);
             var len = match[1].length + match.index;
             var xmin = x + match.index;
             var xmax = x + match.index + match[1].length - 1;
@@ -23,7 +22,6 @@ input.forEach((i, y) => {
             })
             x += len;
             str = str.substring(len);
-            //console.log(str, x);
         } else {
             break;
         }

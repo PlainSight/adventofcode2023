@@ -6,26 +6,16 @@ var parts = [];
 var symbols = [];
 
 input.forEach((i, y) => {
-    var x = 0;
     var str = i;
-    while(str.length > 0) {
-        var match = /(\d+)/.exec(str);
-        if (match) {
-            var len = match[1].length + match.index;
-            var xmin = x + match.index;
-            var xmax = x + match.index + match[1].length - 1;
-            parts.push({
-                val: parseInt(match[1]),
-                y: y,
-                xmin: xmin,
-                xmax: xmax
-            })
-            x += len;
-            str = str.substring(len);
-        } else {
-            break;
-        }
-    }
+    var matches = [...str.matchAll(/\d+/g)];
+    matches.forEach(m => {
+        parts.push({
+            val: parseInt(m[0]),
+            y: y,
+            xmin: m.index,
+            xmax: m.index + m[0].length - 1
+        })
+    })
 });
 
 var distsym = {};
