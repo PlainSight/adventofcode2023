@@ -1,4 +1,3 @@
-const { match } = require('assert');
 var fs = require('fs');
 
 var input = fs.readFileSync('./input.txt', 'utf8').split('\r\n');
@@ -15,10 +14,6 @@ function scoreCard(cardId) {
         }
     })
     return matches;
-    // if (matches > 0) {
-    //     return Math.pow(2, matches-1);
-    // }
-    // return 0;
 }
 
 var stack = [];
