@@ -4,18 +4,14 @@ var input = fs.readFileSync('./input.txt', 'utf8').split('\r\n');
 
 var galaxies = [];
 
-var minx = Number.MAX_SAFE_INTEGER;
-var maxx = -Number.MAX_SAFE_INTEGER;
-var miny = Number.MAX_SAFE_INTEGER;
-var maxy = -Number.MAX_SAFE_INTEGER;
+var minx = 0;
+var maxx = input[0].length;
+var miny = 0;
+var maxy = input.length;
 
 input.forEach((i, y) => {
     i.split('').forEach((j, x) => {
         if (j == '#') {
-            if (x > maxx) {maxx = x;}
-            if (x < minx) {minx = x;}
-            if (y > maxy) {maxy = y;}
-            if (y < miny) {miny = y;}
             galaxies.push({
                 x: x,
                 y: y
