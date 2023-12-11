@@ -151,29 +151,29 @@ for(var y = 0; y < input.length; y++) {
 }
 
 
-// for(var y = 0; y < input.length; y++) {
-//     var line = '';
-//     var plainLine = '';
-//     for (var x = 0; x < input[0].length; x++) {
-//         if (inloop[k(x, y)]) {
-//             plainLine += input[y][x];
-//             if (on[k(x, y)]) {
-//                 line += on[k(x, y)];
-//             } else {
-//                 line += '*';
-//             }
-//         } else {
-//             plainLine += '.';
-//             if (enclosed[k(x, y)]) {
-//                 line += 'E';
-//             } else {
-//                 line += '.';
-//             }
-//         }
-//     }
-//     //console.log(plainLine);
-//     console.log(line);
-// }
+for(var y = 0; y < input.length; y++) {
+    var line = '';
+    var plainLine = '';
+    for (var x = 0; x < input[0].length; x++) {
+        if (inloop[k(x, y)]) {
+            plainLine += input[y][x];
+            if (on[k(x, y)]) {
+                line += on[k(x, y)];
+            } else {
+                line += '*';
+            }
+        } else {
+            plainLine += '.';
+            if (enclosed[k(x, y)]) {
+                line += 'E';
+            } else {
+                line += '.';
+            }
+        }
+    }
+    //console.log(plainLine);
+    console.log(line);
+}
 
 // for(var y = 0; y < input.length; y++) {
 //     var line = '';

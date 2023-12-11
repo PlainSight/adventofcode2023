@@ -27,8 +27,6 @@ input.forEach((i, y) => {
 var darkEnergyX = [];
 var darkEnergyY = [];
 
-console.log(galaxies);
-
 for(var x = minx; x < maxx; x++) {
     if (galaxies.filter(g => g.x == x).length == 0) {
         darkEnergyX.push(x);
@@ -41,39 +39,16 @@ for(var y = miny; y < maxy; y++) {
     }
 }
 
-darkEnergyX.forEach((x, xi) => {
-    galaxies.forEach(g => {
-        if (g.x > x) {
-            g.x++;
-        }
-    })
-    darkEnergyX.forEach((xx, xxi) => {
-        if (xx > x && xxi > xi) {
-            darkEnergyX[xxi]++;
-        }
-    })
-});
-
-
-darkEnergyY.forEach((y, yi) => {
-    galaxies.forEach(g => {
-        if (g.y > y) {
-            g.y++;
-        }
-    })
-    darkEnergyY.forEach((yy, yyi) => {
-        if (yy > y && yyi > yi) {
-            darkEnergyY[yyi]++;
-        }
-    })
-});
-
 var sum = 0;
+
+var expansion = (1000000-1);
 
 galaxies.forEach((g, gi) => {
     galaxies.forEach((gg, ggi) => {
         if (ggi > gi) {
-            var val = (Math.abs(gg.x - g.x) + Math.abs(gg.y - g.y));
+            var dex = darkEnergyX.filter(x => g.x < x === x < gg.x).length * expansion;
+            var dey = darkEnergyY.filter(y => g.y < y === y < gg.y).length * expansion;
+            var val = (Math.abs(gg.x - g.x) + Math.abs(gg.y - g.y)) + dex + dey;
             sum += val;
         }
     })
