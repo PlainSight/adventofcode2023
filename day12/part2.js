@@ -7,9 +7,6 @@ var sum = 0;
 
 var cache = {};
 
-var hit = 0;
-var miss = 0;
-
 function key(seqIndex, runIndex, runPosition) {
     return `${seqIndex}:${runIndex}:${runPosition}`;
 }
@@ -17,10 +14,8 @@ function key(seqIndex, runIndex, runPosition) {
 function explore(seq, seqIndex, runs, runIndex, runPosition) {
     var k = key(seqIndex, runIndex, runPosition);
     if (cache[k] !== undefined) {
-        hit++;
         return cache[k];
     }
-    miss++;
     for(var i = seqIndex; i < seq.length; i++) {
         // we are in a run
         if (runPosition > 0) {
@@ -81,11 +76,8 @@ input.forEach(i => {
 
     var runs = (parts[1]+','+parts[1]+','+parts[1]+','+parts[1]+','+parts[1]).split(',').map(n => parseInt(n)); //
 
-    //console.log('exploring', seq.join(''), 0, runs.join(','), 0, 0, seq.length, runs.reduce((a, c) => a+c, 0));
-    var valid = explore(seq, 0, runs, 0, 0);
+    sum += explore(seq, 0, runs, 0, 0);
     cache = {};
-
-    sum += valid;
 });
 
 console.log(sum);
