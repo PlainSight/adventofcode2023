@@ -81,18 +81,10 @@ var dirs = [
 
 var endNode = null;
 
-var pops = 0;
-
 while (stack.length) {
     var lowest = pop();
 
-    if (stack.length < 5) {
-        //console.log('state', lowest, stack);
-    }
-
-    pops++
-
-    if (lowest.x == map[0].length-1 && lowest.y == map.length-1) {
+    if (lowest.x == map[0].length-1 && lowest.y == map.length-1 && lowest.sr >= 4) {
         endNode = lowest;
         break;
     }
