@@ -149,4 +149,3 @@ for(var d = 0; d < dirs.length; d++) {
 }
 
 console.log(max);
-
