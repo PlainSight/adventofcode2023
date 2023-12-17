@@ -89,10 +89,6 @@ while (stack.length) {
         break;
     }
 
-    if (lowest.x < 0 || lowest.x >= map[0].length || lowest.y < 0 || lowest.y >= map.length) {
-        continue;
-    }
-
     if (seen[key(lowest)]) {
         continue;
     } else {
