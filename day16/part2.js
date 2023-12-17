@@ -66,7 +66,7 @@ for(var d = 0; d < dirs.length; d++) {
     var sx = 0;
     var sy = 0;
     var sdx = 0;
-    var sdx = 0;
+    var sdy = 0;
     var smx = 0;
     var smy = 0;
     if (dirs[d][0] != 0) {
@@ -120,17 +120,14 @@ for(var d = 0; d < dirs.length; d++) {
         while(stack.length) {
             var top = stack.pop();
         
+            if (top.x >= input[0].length || top.x < 0 || top.y >= input.length || top.y < 0) { 
+                continue;
+            }
+
             if (seen[key(top)]) {
                 continue;
             } else {
                 seen[key(top)] = true;
-            }
-        
-            if (top.x >= input[0].length || top.x < 0) { 
-                continue;
-            }
-            if (top.y >= input.length || top.y < 0) { 
-                continue;
             }
         
             uniqueXY[top.x+','+top.y] = true;
