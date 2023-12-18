@@ -58,7 +58,7 @@ for(var i = 1; i < vertices.length-1; i++) {
     sum += vertices[i][1]*(vertices[i-1][0] - vertices[i+1][0]);
 }
 
-console.log(Math.abs(sum)/2 + dist/2 + 1);
+console.log('shoelace', Math.abs(sum)/2 + dist/2 + 1);
 
 var trap = 0;
 
@@ -66,4 +66,13 @@ for(var i = 0; i < vertices.length-1; i++) {
     trap += (vertices[i][1] + vertices[i+1][1])*(vertices[i][0] - vertices[i+1][0]);
 }
 
-console.log((trap)/2 + dist/2 + 1);
+console.log('trapezoid', (trap)/2 + dist/2 + 1);
+
+
+var tri = 0;
+
+for(var i = 0; i < vertices.length-1; i++) {
+    tri += vertices[i][0] * vertices[i+1][1] - vertices[i][1] * vertices[i+1][0];
+}
+
+console.log('triangle', tri/2 + dist/2 + 1);
