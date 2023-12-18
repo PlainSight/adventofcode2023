@@ -1,5 +1,7 @@
 var fs = require('fs');
 
+var start = Date.now();
+
 var input = fs.readFileSync('./input.txt', 'utf8').split('\r\n');
 
 var map = input.map(i => i.split('').map(n => parseInt(n)));
@@ -7,7 +9,7 @@ var map = input.map(i => i.split('').map(n => parseInt(n)));
 var MAXSTRAIGHT = 10;
 var MINSTRAIGHT = 4;
 
-var seen = {};
+var seen = new Array(4*10*input.length*input[0].length);
 
 var stack = [];
 
@@ -55,22 +57,11 @@ function pop() {
 
 push({
     x: 0,
-    y: 1,
-    d: 2,
-    cost: map[1][0],
-    sr: 1
-});
-push({
-    x: 1,
     y: 0,
     d: 1,
-    cost: map[0][1],
-    sr: 1
+    cost: 0,
+    sr: 0
 });
-
-function key(node) {
-    return `${node.x},${node.y},${node.d},${node.sr}`;
-}
 
 var dirs = [
     [0, -1, '^'], 
@@ -89,10 +80,12 @@ while (stack.length) {
         break;
     }
 
-    if (seen[key(lowest)]) {
+    var key = (4*10*lowest.y*input[0].length) + (4*10 * lowest.x) + 4*lowest.sr + lowest.d;
+
+    if (seen[key]) {
         continue;
     } else {
-        seen[key(lowest)] = true;
+        seen[key] = true;
     }
     // straight
     if (lowest.sr < MAXSTRAIGHT) {
@@ -146,7 +139,7 @@ while (stack.length) {
 
 var path = [];
 
-console.log(endNode.cost);
+console.log('ans:', endNode.cost, 'time (ms):', Date.now() - start);
 
 while(endNode) {
     path.unshift(endNode);
@@ -165,5 +158,3 @@ for(var y = 0; y < map.length; y++) {
     }
     console.log(line);
 }
-
-//console.log(path);
