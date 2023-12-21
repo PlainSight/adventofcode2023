@@ -1,5 +1,4 @@
 var fs = require('fs');
-const { start } = require('repl');
 
 var geo = fs.readFileSync('./input.txt', 'utf8').split('\r\n').map(l => l.split(''));
 
@@ -18,10 +17,7 @@ geo.forEach((l, y) => {
 geo[startY][startX] = '.';
 
 
-var STEPS = 26501365;
-
-
-function calculate(starts, dests, steps) {
+function calculate(starts, dests, steps, print = false) {
     var foundDests = [];
     var finalDests = [];
     
@@ -51,7 +47,7 @@ function calculate(starts, dests, steps) {
     while(stack.length) {
         var top = stack.pop();
     
-        if (top.s % 2 == 1) {
+        if (top.s % 2 == (steps == -1 ? 1 : (steps % 2))) {
             fullFloodtime = Math.max(fullFloodtime, top.s);
             if (finalDests[k(top)]) {
                 continue;
@@ -88,49 +84,72 @@ function calculate(starts, dests, steps) {
         }
     }
 
+    if (print) {
+        for(var y = 0; y < geo.length; y++) {
+            var line = '';
+            for(var x = 0; x < geo[0].length; x++) {
+                if (finalDests[k({x: x, y: y})] != undefined) {
+                    line += 'O';
+                } else {
+                    line += geo[y][x];
+                }
+            }
+            console.log(line);
+        }
+    }
+
     return [finalDests.filter(fd => fd).length, fullFloodtime];
 }
+
+var STEPS = 26501365; // 17
 
 var fullFloodPolarity0 = calculate([[startX, startY]], null, -1);
 var fullFloodPolarity1 = calculate([[startX-1, startY]], null, -1);
 
-console.log(fullFloodPolarity0, fullFloodPolarity1);
+//console.log(fullFloodPolarity0, fullFloodPolarity1);
 
 var startToEdgesStep = calculate([[startX, startY]], [(x, y) => x < 0, (x, y) => y < 0, (x, y) => y >= geo.length, (x, y) => x >= geo[0].length], -1);
-var leftEdgeToEdgesStep = calculate([[0, 65]], [(x, y) => x < 0, (x, y) => y < 0, (x, y) => y >= geo.length, (x, y) => x >= geo[0].length], -1);
 
-var cornersFloodTime = [[0, 0], [geo[0].length-1, 0], [0, geo.length-1], [geo[0].length-1, geo.length-1]].map(m => calculate([m], null, -1));
+var toEdge = startToEdgesStep[0][2]-1;
 
-//var numberOfBasePolarityTriangles = 
+var stepsOutSideOfStart = STEPS - toEdge;
+var g = geo.length;
+var hg = (geo.length-1)/2;
+var tilesWideAfterStart = (stepsOutSideOfStart / geo.length);
 
-console.log(startToEdgesStep);
-console.log(leftEdgeToEdgesStep);
-console.log(cornersFloodTime);
-
-// for(var y = 0; y < geo.length; y++) {
-//     var line = '';
-//     for(var x = 0; x < geo[0].length; x++) {
-//         if (finalDests[k({x: x, y: y})] != undefined) {
-//             line += finalDests[k({x: x, y: y})];
-//         } else {
-//             line += geo[y][x];
-//         }
-//     }
-//     console.log(line);
-// }
-
-//console.log(Math.max(...finalDests.filter(fd => fd  != undefined)));
-//console.log(finalDests.filter(fd => fd  != undefined).length);
+//console.log(stepsOutSideOfStart, tilesWideAfterStart);
 
 
+var smallEdgesFlood65 = [[0, 0], [geo[0].length-1, 0], [0, geo.length-1], [geo[0].length-1, geo.length-1]].map(m => calculate([m], null, hg-1));
 
-//26501365 - 65 = 26501300
+var endsFlood131 = [[0, hg], [geo[0].length-1, hg], [hg, 0], [hg, geo.length-1]].map(m => calculate([m], null, g-1));
 
-//26501300 / 131 = 202300 OR 101150 on each side so outside is polarity 0
-//we thus have 101151 polarity 0 in the middle row and 101150 polarity 1 in the middle row
+var bigEdgesFlood131 = [
+    [[0, hg], [hg, geo.length-1]],
+    [[0, hg], [hg, 0]],
+    [[geo[0].length-1, hg], [hg, geo.length-1]],
+    [[geo[0].length-1, hg], [hg, 0]],
+].map(m => calculate(m, null, g-1));
 
-// total polarity 0 is thus 101151^2 = 10231524801
-// total polarity 1 is thus 101150^2 = 10231322500
+// console.log(smallEdgesFlood65);
+// console.log(endsFlood131);
+// console.log(bigEdgesFlood131);
+// console.log(tilesWideAfterStart);
 
-//the outer ring of polarity 0 needs to be filled either from one or two edges for 131 steps
-//an extra outer ring of polarity 1 needs to be filled from the corner  
+var sum = 0;
+
+var pol0Sum = (tilesWideAfterStart-1)*(tilesWideAfterStart-1)*fullFloodPolarity0[0];
+var pol1Sum = tilesWideAfterStart*tilesWideAfterStart*fullFloodPolarity1[0];
+var endsSum = endsFlood131.reduce((a, c) => a+c[0], 0);  // ends;
+var bigEdgesSum = (tilesWideAfterStart-1)*bigEdgesFlood131.reduce((a, c) => a+c[0], 0); // big edge
+var littleEdgesSum = tilesWideAfterStart*smallEdgesFlood65.reduce((a, c) => a+c[0], 0); // little edge
+
+//console.log(pol0Sum, pol1Sum, endsSum, bigEdgesSum, littleEdgesSum);
+
+sum += pol0Sum;
+sum += pol1Sum;
+sum += endsSum
+sum += bigEdgesSum
+sum += littleEdgesSum
+
+console.log(sum);
