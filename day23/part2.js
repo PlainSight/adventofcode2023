@@ -71,6 +71,9 @@ Object.entries(chokepoints).forEach(e => {
             }
         })
     }
+    if (destChokes.some(d => d[0] == 2)) {
+        destChokes = destChokes.filter(d => d[0] == 2);
+    }
     edgesFrom[v] = destChokes;
 })
 
@@ -78,28 +81,28 @@ var longestPath = 0;
 
 var stack = [];
 
-stack.push([1, -1, 0, 2, 0]);
+stack.push([1, -1, 0, [2, 0]]);
 
 var bestDist = {}; // key = start,[ordered middle],end
 
-function addSeen(seen, seen2, next) {
+function addSeen(seen, next) {
     if (next > 25) {
-        return [seen, seen2 | (1 << (next - 25))];
+        return [seen[0], seen[1] | (1 << (next - 25))];
     } else {
-        return [seen | (1 << next), seen2];
+        return [seen[0] | (1 << next), seen[1]];
     }
 }
 
-function hasSeen(seen, seen2, choke) {
+function hasSeen(seen, choke) {
     if (choke > 25) {
-        return (seen2 & (1 << (choke - 25))) != 0;
+        return (seen[1] & (1 << (choke - 25))) != 0;
     } else {
-        return (seen & (1 << choke)) != 0;
+        return (seen[0] & (1 << choke)) != 0;
     }
 }
 
 while(stack.length) {
-    var [c, p, dist, seen, seen2] = stack.pop();
+    var [c, p, dist, seen] = stack.pop();
 
     if (c == 2) {
         if (dist > longestPath) {
@@ -108,20 +111,16 @@ while(stack.length) {
         continue;
     }
 
-    var edgesToFollow = edgesFrom[c].filter(e => e[0] != p);
-    if (edgesToFollow.some(e => e[0] == 2)) {
-        edgesToFollow = edgesToFollow.filter(e => e[0] == 2);
-    }
-    edgesToFollow.forEach(to => {
-        if (!hasSeen(seen, seen2, to[0])) {
-            var [newSeen, newSeen2] = addSeen(seen, seen2, to[0]);
+    edgesFrom[c].forEach(to => {
+        if (!hasSeen(seen, to[0])) {
+            var newSeen = addSeen(seen, to[0]);
 
-            var key = `${newSeen},${newSeen2},${to[0]}`;
+            var key = `${newSeen},${to[0]}`;
 
             var bd = bestDist[key];
             if (!bd || (dist+to[1]) > bd) {
                 bestDist[key] = (dist+to[1]);
-                stack.push([to[0], c, dist+to[1], newSeen, newSeen2]);
+                stack.push([to[0], c, dist+to[1], newSeen]);
             }
         }
     })
