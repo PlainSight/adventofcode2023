@@ -45,11 +45,6 @@ function gcd(a, b) {
     }
 }
 
-function normalize(v) {
-    var mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-    return [v[0]/mag, v[1]/mag, v[2]/mag];
-}
-
 function solve(point1, delta1, point2, delta2) {
     // (1) point1[0] + delta1[0]*s = point2[0] + delta2[0]*t
     // (2) point1[1] + delta1[1]*s = point2[1] + delta2[1]*t
@@ -57,31 +52,37 @@ function solve(point1, delta1, point2, delta2) {
 
     // subtract 2 from 1 to remove all instances of t
     // first multiply (2) by delta2[0]/delta2[1]
-    var mulVal = delta2[0]/delta2[1];
+    if (delta2[1] == BigInt(0)) {
+        return BigInt(0);
+    }
+    var mulVal = Number(delta2[0])/Number(delta2[1]);
 
-    var f2a = point1[1] * mulVal;
-    var f2b = delta1[1] * mulVal;
-    var f2c = point2[1] * mulVal;
+    var f2a = Number(point1[1]) * mulVal;
+    var f2b = Number(delta1[1]) * mulVal;
+    var f2c = Number(point2[1]) * mulVal;
 
     // new formula
 
-    var nfa = point1[0] - f2a;
-    var nfb = delta1[0] - f2b;
-    var nfc = point2[0] - f2c;
+    var nfa = Number(point1[0]) - f2a;
+    var nfb = Number(delta1[0]) - f2b;
+    var nfc = Number(point2[0]) - f2c;
+    if (nfb == 0) {
+        return BigInt(0);
+    }
     var s = (nfa - nfc) / -nfb;
 
     //console.log(point1, delta1, point2, delta2, 'ans', s);
     
-    return s;
+    return BigInt(Math.floor(s));
 }
 
 function findRockStart(inp1, inp2, inp3) {
-    var v1 = inp1.slice(0, 3);
-    var v1d = inp1.slice(3);
-    var v2 = inp2.slice(0, 3);
-    var v2d = inp2.slice(3);
-    var v3 = inp3.slice(0, 3);
-    var v3d = inp3.slice(3);
+    var v1 = inp1.slice(0, 3).map(n => BigInt(n));
+    var v1d = inp1.slice(3).map(n => BigInt(n));
+    var v2 = inp2.slice(0, 3).map(n => BigInt(n));
+    var v2d = inp2.slice(3).map(n => BigInt(n));
+    var v3 = inp3.slice(0, 3).map(n => BigInt(n));
+    var v3d = inp3.slice(3).map(n => BigInt(n));
     
     // made all deltas relative to v1d
     v2d = subvec(v2d, v1d);
@@ -100,28 +101,31 @@ function findRockStart(inp1, inp2, inp3) {
     
     // look for intersection of v3-> and plane
     var rightSide = (BigInt(planeNormal[0]) * BigInt(v1[0])) + (BigInt(planeNormal[1]) * BigInt(v1[1])) + (BigInt(planeNormal[2]) * BigInt(v1[2])); 
-    console.log('rightSide', rightSide)
 
-    var leftV = [v3[0]*planeNormal[0], v3[1]*planeNormal[1], v3[2]*planeNormal[2]];
-    var leftVD = [v3d[0]*planeNormal[0], v3d[1]*planeNormal[1], v3d[2]*planeNormal[2]];
-    var rightMinusLeftV = rightSide - leftV.reduce((a, b) => a + b, 0);
-    var leftInTermsOfT = leftVD.reduce((a, b) => a + b, 0);
-    
+    var leftV = [BigInt(v3[0])*BigInt(planeNormal[0]), BigInt(v3[1])*BigInt(planeNormal[1]), BigInt(v3[2])*BigInt(planeNormal[2])];
+
+    var leftVD = [BigInt(v3d[0])*BigInt(planeNormal[0]), BigInt(v3d[1])*BigInt(planeNormal[1]), BigInt(v3d[2])*BigInt(planeNormal[2])];
+    var rightMinusLeftV = rightSide - leftV.reduce((a, b) => a + b, BigInt(0));
+    var leftInTermsOfT = leftVD.reduce((a, b) => a + b, BigInt(0));
     var t = rightMinusLeftV / leftInTermsOfT;
-
-    console.log('blah', t);
     
     // now we know t we can determine the delta of the rock
     // we know the rock passes though v1 then through v3+(v3d*t)
     
     var rockDelta = subvec([v3[0]+(v3d[0]*t), v3[1]+(v3d[1]*t), v3[2]+(v3d[2]*t)], v1);
-    console.log('rock delta', rockDelta);
-    var smallestGCD = Math.min(...rockDelta.map(d => gcd(Math.abs(d), t)));
-    if (smallestGCD > 1) {
-        t = (t / smallestGCD);
-        console.log('lol this happens');
+    console.log('rock delta', rockDelta, t);
+    var smallestGCD = Math.min(...rockDelta.map(d => gcd(Math.abs(Number(d)), Number(t))));
+    var divisor = gcd(
+        gcd(Math.abs(Number(rockDelta[0])), Math.abs(Number(rockDelta[1]))),
+        gcd(Math.abs(Number(rockDelta[1])), Math.abs(Number(rockDelta[2]))),
+    );
+    if (divisor > 1) {
+        console.log('divisor', divisor);
+        rockDelta = rockDelta.map(rd => rd / BigInt(divisor));
     }
-    var rockVelo = rockDelta
+    console.log('rock delta devided', rockDelta, t);
+
+    var rockVelo = rockDelta;
 
     // find intersection time with v2
 
@@ -130,24 +134,28 @@ function findRockStart(inp1, inp2, inp3) {
     // v1[1] + rockVelo[1]*s = v2[1] + v2d[1]*t
     // v1[2] + rockVelo[2]*s = v2[2] + v2d[2]*t
 
-    // solve for t
-    var t = solve(v2, v2d, v1, rockVelo);
-    var startOfRock1 = [-1, -1, -1];
+    var actualRockVelocity = addvec(rockVelo, v1d);
 
-    if (!isNaN(t)) {
+    console.log('actualRockVelocity', actualRockVelocity);
+
+    // solve for t
+    var t1 = solve(v2, v2d, v1, rockVelo);
+    var startOfRock1 = [BigInt(-1), BigInt(-1), BigInt(-1)];
+
+    if (t1 != BigInt(0)) {
         // determine where rock is thrown from relatively
-        var actualRockVelocity = addvec(rockVelo, v1d);
-        var collisionWithV2 = addvec(v2, scale(addvec(v1d, v2d), t));
-        startOfRock1 = subvec(collisionWithV2, scale(actualRockVelocity, t));
+        var collisionWithV2 = addvec(v2, scale(addvec(v1d, v2d), t1));
+        console.log('collision with v2', collisionWithV2);
+        startOfRock1 = subvec(collisionWithV2, scale(actualRockVelocity, t1));
     }
 
     var t2 = solve(v3, v3d, v1, rockVelo);
-    var startOfRock2 = [-2, -2, -2];
+    var startOfRock2 = [BigInt(-2), BigInt(-2), BigInt(-2)];
 
-    if (!isNaN(t2)) {
+    if (t2 != BigInt(0)) {
         // determine where rock is thrown from relatively
-        var actualRockVelocity = addvec(rockVelo, v1d);
         var collisionWithV3 = addvec(v3, scale(addvec(v1d, v3d), t2));
+        console.log('collision with v3', collisionWithV3);
         startOfRock2 = subvec(collisionWithV3, scale(actualRockVelocity, t2));
     }
 
@@ -160,13 +168,14 @@ function findRockStart(inp1, inp2, inp3) {
     return null;
 }
 
-for(var i = 0; i < 3; i++) {
-    for(var j = 0; j < 3; j++) {
-        for(var k = 0; k < 3; k++) {
+for(var i = 0; i < 10; i++) {
+    for(var j = 0; j < 10; j++) {
+        for(var k = 0; k < 10; k++) {
             if (i != j && j != k && i != k) {
                 var start = findRockStart(stones[i], stones[j], stones[k]);
                 if (start) {
                     console.log(start[0]+start[1]+start[2]);
+                    return;
                 }
             }
         }
