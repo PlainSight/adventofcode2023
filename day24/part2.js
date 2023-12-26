@@ -13,20 +13,12 @@ function scale(a, v) {
     return a.map(x => x*v);
 }
 
-function div(a, v) {
-    return a.map(x => x/v);
-}
-
 function subvec(a, b) {
     return a.map((_, i) => a[i] - b[i]);
 }
 
 function addvec(a, b) {
     return a.map((_, i) => a[i] + b[i]);
-}
-
-function divvec(a, b) {
-    return a.map((_, i) => b[i] == 0 ? 0 : a[i] / b[i]);
 }
 
 function cross(a, b) {
@@ -70,8 +62,6 @@ function solve(point1, delta1, point2, delta2) {
         return BigInt(0);
     }
     var s = (nfa - nfc) / -nfb;
-
-    //console.log(point1, delta1, point2, delta2, 'ans', s);
     
     return BigInt(Math.floor(s));
 }
@@ -95,8 +85,6 @@ function findRockStart(inp1, inp2, inp3) {
     
     var planeNormal = cross(A, B);
 
-    //planeNormal = normalize(planeNormal);
-    
     // plane point = v1
     
     // look for intersection of v3-> and plane
@@ -113,17 +101,14 @@ function findRockStart(inp1, inp2, inp3) {
     // we know the rock passes though v1 then through v3+(v3d*t)
     
     var rockDelta = subvec([v3[0]+(v3d[0]*t), v3[1]+(v3d[1]*t), v3[2]+(v3d[2]*t)], v1);
-    console.log('rock delta', rockDelta, t);
-    var smallestGCD = Math.min(...rockDelta.map(d => gcd(Math.abs(Number(d)), Number(t))));
     var divisor = gcd(
         gcd(Math.abs(Number(rockDelta[0])), Math.abs(Number(rockDelta[1]))),
         gcd(Math.abs(Number(rockDelta[1])), Math.abs(Number(rockDelta[2]))),
     );
     if (divisor > 1) {
-        console.log('divisor', divisor);
         rockDelta = rockDelta.map(rd => rd / BigInt(divisor));
     }
-    console.log('rock delta devided', rockDelta, t);
+    //console.log('rock delta devided', rockDelta, t);
 
     var rockVelo = rockDelta;
 
@@ -136,7 +121,7 @@ function findRockStart(inp1, inp2, inp3) {
 
     var actualRockVelocity = addvec(rockVelo, v1d);
 
-    console.log('actualRockVelocity', actualRockVelocity);
+    //console.log('actualRockVelocity', actualRockVelocity);
 
     // solve for t
     var t1 = solve(v2, v2d, v1, rockVelo);
@@ -145,7 +130,7 @@ function findRockStart(inp1, inp2, inp3) {
     if (t1 != BigInt(0)) {
         // determine where rock is thrown from relatively
         var collisionWithV2 = addvec(v2, scale(addvec(v1d, v2d), t1));
-        console.log('collision with v2', collisionWithV2);
+        //console.log('collision with v2', collisionWithV2);
         startOfRock1 = subvec(collisionWithV2, scale(actualRockVelocity, t1));
     }
 
@@ -155,11 +140,9 @@ function findRockStart(inp1, inp2, inp3) {
     if (t2 != BigInt(0)) {
         // determine where rock is thrown from relatively
         var collisionWithV3 = addvec(v3, scale(addvec(v1d, v3d), t2));
-        console.log('collision with v3', collisionWithV3);
+        //console.log('collision with v3', collisionWithV3);
         startOfRock2 = subvec(collisionWithV3, scale(actualRockVelocity, t2));
     }
-
-    console.log('fff', t, startOfRock1, t2, startOfRock2);
 
     if (startOfRock1.every((r1, i) => r1 == startOfRock2[i])) {
         return startOfRock1;
@@ -168,13 +151,13 @@ function findRockStart(inp1, inp2, inp3) {
     return null;
 }
 
-for(var i = 0; i < 10; i++) {
-    for(var j = 0; j < 10; j++) {
-        for(var k = 0; k < 10; k++) {
+for(var i = 0; i < 6; i++) {
+    for(var j = 0; j < 6; j++) {
+        for(var k = 0; k < 6; k++) {
             if (i != j && j != k && i != k) {
                 var start = findRockStart(stones[i], stones[j], stones[k]);
                 if (start) {
-                    console.log(start[0]+start[1]+start[2]);
+                    console.log(Number(start[0]+start[1]+start[2]));
                     return;
                 }
             }
